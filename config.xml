@@ -61,6 +61,5 @@
     <plugin name="cordova-plugin-android-permissions" spec="^1.1.5" />
     <plugin name="cordova-plugin-statusbar" spec="^4.0.0" />
     <plugin name="cordova-plugin-device" spec="^2.1.0" />
-    <plugin name="cordova-plugin-whitelist" spec="^1.3.5" />
 
 </widget>
