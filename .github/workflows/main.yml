@@ -42,16 +42,38 @@ jobs:
 
       - name: Fix Gradle version
         run: |
-          cd build/platforms/android/gradle/wrapper
-          rm -f gradle-wrapper.properties
-          cat > gradle-wrapper.properties << 'EOF'
-          distributionBase=GRADLE_USER_HOME
-          distributionPath=wrapper/dists
-          distributionUrl=https://services.gradle.org/distributions/gradle-8.5-bin.zip
-          networkTimeout=10000
-          zipStoreBase=GRADLE_USER_HOME
-          zipStorePath=wrapper/dists
-          EOF
+          ls -la build/platforms/android/
+          ls -la build/platforms/android/gradle/ || echo "no gradle dir"
+          find build/platforms/android -name "gradle-wrapper.properties" -type f
+          WRAPPER=$(find build/platforms/android -name "gradle-wrapper.properties" -type f | head -1)
+          if [ -n "$WRAPPER" ]; then
+            DIR=$(dirname "$WRAPPER")
+            echo "Found wrapper at: $WRAPPER"
+            echo "Directory: $DIR"
+            cat "$WRAPPER"
+            rm -f "$WRAPPER"
+            cat > "$WRAPPER" << 'EOF'
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https://services.gradle.org/distributions/gradle-8.5-bin.zip
+networkTimeout=10000
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+EOF
+            echo "Updated wrapper:"
+            cat "$WRAPPER"
+          else
+            echo "No gradle-wrapper.properties found, creating..."
+            mkdir -p build/platforms/android/gradle/wrapper
+            cat > build/platforms/android/gradle/wrapper/gradle-wrapper.properties << 'EOF'
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https://services.gradle.org/distributions/gradle-8.5-bin.zip
+networkTimeout=10000
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+EOF
+          fi
 
       - name: Add plugins
         run: |
