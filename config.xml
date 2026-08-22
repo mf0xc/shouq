@@ -12,7 +12,6 @@
 
     <content src="index.html" />
 
-    <!-- Preferences -->
     <preference name="Orientation" value="portrait" />
     <preference name="Fullscreen" value="false" />
     <preference name="DisallowOverscroll" value="true" />
@@ -26,16 +25,13 @@
     <preference name="AndroidInsecureFileModeEnabled" value="true" />
     <preference name="EnableViewportScale" value="true" />
 
-    <!-- Security -->
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
 
-    <!-- Platform: Android -->
     <platform name="android">
         <icon src="icon.png" />
 
-        <!-- Permissions -->
         <config-file parent="/*" target="AndroidManifest.xml">
             <uses-permission android:name="android.permission.INTERNET" />
             <uses-permission android:name="android.permission.VIBRATE" />
@@ -50,13 +46,11 @@
         </edit-config>
     </platform>
 
-    <!-- Platform: iOS -->
     <platform name="ios">
         <icon src="icon.png" />
         <preference name="deployment-target" value="13.0" />
     </platform>
 
-    <!-- Plugins -->
     <plugin name="cordova-plugin-vibration" spec="^3.1.1" />
     <plugin name="cordova-plugin-android-permissions" spec="^1.1.5" />
     <plugin name="cordova-plugin-statusbar" spec="^4.0.0" />
