@@ -12,7 +12,6 @@
 
     <content src="index.html" />
 
-    <!-- Preferences -->
     <preference name="Orientation" value="portrait" />
     <preference name="Fullscreen" value="false" />
     <preference name="DisallowOverscroll" value="true" />
@@ -20,100 +19,46 @@
     <preference name="StatusBarBackgroundColor" value="#050505" />
     <preference name="StatusBarStyle" value="lightcontent" />
     <preference name="KeepRunning" value="true" />
-    <preference name="SplashScreenDelay" value="2000" />
-    <preference name="FadeSplashScreenDuration" value="500" />
-    <preference name="AutoHideSplashScreen" value="true" />
-    <preference name="ShowSplashScreenSpinner" value="false" />
     <preference name="android-minSdkVersion" value="24" />
-    <preference name="android-targetSdkVersion" value="34" />
+    <preference name="android-targetSdkVersion" value="36" />
     <preference name="AndroidPersistentFileLocation" value="Compatibility" />
     <preference name="AndroidInsecureFileModeEnabled" value="true" />
     <preference name="EnableViewportScale" value="true" />
-    <preference name="MediaPlaybackRequiresUserAction" value="false" />
-    <preference name="AllowInlineMediaPlayback" value="true" />
 
-    <preference name="WKWebViewOnly" value="true" />
-    <preference name="CordovaWebViewEngine" value="CDVWKWebViewEngine" />
-
-    <!-- Security -->
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
-    <allow-intent href="tel:*" />
-    <allow-intent href="sms:*" />
-    <allow-intent href="mailto:*" />
-    <allow-intent href="geo:*" />
 
-    <!-- Platform: Android -->
     <platform name="android">
-        <icon src="res/icon/android/mipmap-xxxhdpi/ic_launcher.png" density="xxxhdpi" />
-        <icon src="res/icon/android/mipmap-xxhdpi/ic_launcher.png" density="xxhdpi" />
-        <icon src="res/icon/android/mipmap-xhdpi/ic_launcher.png" density="xhdpi" />
-        <icon src="res/icon/android/mipmap-hdpi/ic_launcher.png" density="hdpi" />
-        <icon src="res/icon/android/mipmap-mdpi/ic_launcher.png" density="mdpi" />
+        <icon src="icon.png" />
+        <preference name="AndroidWindowSplashScreenAnimatedIcon" value="icon.png" />
+        <preference name="AndroidWindowSplashScreenIconBackgroundColor" value="#050505" />
+        <preference name="AndroidWindowSplashScreenBackground" value="#050505" />
 
-        <splash src="res/screen/android/splash-port-xxxhdpi.png" density="port-xxxhdpi" />
-        <splash src="res/screen/android/splash-port-xxhdpi.png" density="port-xxhdpi" />
-        <splash src="res/screen/android/splash-port-xhdpi.png" density="port-xhdpi" />
-        <splash src="res/screen/android/splash-port-hdpi.png" density="port-hdpi" />
-        <splash src="res/screen/android/splash-port-mdpi.png" density="port-mdpi" />
-
-        <!-- Android Permissions -->
         <config-file parent="/*" target="AndroidManifest.xml">
             <uses-permission android:name="android.permission.INTERNET" />
             <uses-permission android:name="android.permission.VIBRATE" />
             <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
             <uses-permission android:name="android.permission.WAKE_LOCK" />
-            <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
             <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
             <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-            <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
         </config-file>
 
         <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
             <application android:usesCleartextTraffic="false" android:requestLegacyExternalStorage="true" />
         </edit-config>
-
-        <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/screen/android/splash-icon.png" />
-        <preference name="AndroidWindowSplashScreenIconBackgroundColor" value="#050505" />
-        <preference name="AndroidWindowSplashScreenBackground" value="#050505" />
     </platform>
 
-    <!-- Platform: iOS -->
     <platform name="ios">
-        <icon src="res/icon/ios/icon-1024.png" width="1024" height="1024" />
-        <icon src="res/icon/ios/icon-512.png" width="512" height="512" />
-        <icon src="res/icon/ios/icon-180.png" width="180" height="180" />
-        <icon src="res/icon/ios/icon-167.png" width="167" height="167" />
-        <icon src="res/icon/ios/icon-152.png" width="152" height="152" />
-        <icon src="res/icon/ios/icon-120.png" width="120" height="120" />
-        <icon src="res/icon/ios/icon-87.png" width="87" height="87" />
-        <icon src="res/icon/ios/icon-80.png" width="80" height="80" />
-        <icon src="res/icon/ios/icon-76.png" width="76" height="76" />
-        <icon src="res/icon/ios/icon-60.png" width="60" height="60" />
-        <icon src="res/icon/ios/icon-58.png" width="58" height="58" />
-        <icon src="res/icon/ios/icon-40.png" width="40" height="40" />
-        <icon src="res/icon/ios/icon-29.png" width="29" height="29" />
-        <icon src="res/icon/ios/icon-20.png" width="20" height="20" />
-
-        <splash src="res/screen/ios/Default@3x~iphone~comany.png" />
-        <splash src="res/screen/ios/Default@2x~iphone~comany.png" />
-        <splash src="res/screen/ios/Default@2x~ipad~comany.png" />
-        <splash src="res/screen/ios/Default@3x~ipad~comany.png" />
-
+        <icon src="icon.png" />
         <preference name="deployment-target" value="13.0" />
-        <preference name="SwiftVersion" value="5" />
     </platform>
 
-    <!-- Plugins -->
     <plugin name="cordova-plugin-vibration" spec="^3.1.1" />
     <plugin name="cordova-plugin-local-notification" spec="^0.9.0-beta.3" />
     <plugin name="cordova-plugin-android-permissions" spec="^1.1.5" />
     <plugin name="cordova-plugin-statusbar" spec="^4.0.0" />
-    <plugin name="cordova-plugin-splashscreen" spec="^6.0.2" />
     <plugin name="cordova-plugin-device" spec="^2.1.0" />
     <plugin name="cordova-plugin-whitelist" spec="^1.3.5" />
-
-    <hook type="after_prepare" src="scripts/after_prepare.js" />
 
 </widget>
