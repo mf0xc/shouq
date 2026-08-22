@@ -40,14 +40,14 @@ jobs:
           cd build
           cordova platform add android@12.0.1
 
-      - name: Fix Gradle version (Gradle 8.5 compatible with cordova-android@12)
+      - name: Fix Gradle version
         run: |
           cd build/platforms/android/gradle/wrapper
           rm -f gradle-wrapper.properties
           cat > gradle-wrapper.properties << 'EOF'
           distributionBase=GRADLE_USER_HOME
           distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
+          distributionUrl=https://services.gradle.org/distributions/gradle-8.5-bin.zip
           networkTimeout=10000
           zipStoreBase=GRADLE_USER_HOME
           zipStorePath=wrapper/dists
@@ -64,7 +64,6 @@ jobs:
       - name: Build APK
         run: |
           cd build
-          ./gradlew -v
           cordova build android
 
       - name: Upload APK
