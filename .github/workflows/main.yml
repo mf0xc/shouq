@@ -1,7 +1,7 @@
 name: Build Shouq APK
 
 on:
-  workflow_dispatch:  # يعمل فقط عند الضغط يدوياً
+  workflow_dispatch:
 
 jobs:
   build:
@@ -33,13 +33,13 @@ jobs:
           cp style.css build/www/
           cp script.js build/www/
           cp config.xml build/
+          cp icon.png build/www/
           cd build
           cordova platform add android@latest
           cordova plugin add cordova-plugin-vibration
           cordova plugin add cordova-plugin-local-notification
           cordova plugin add cordova-plugin-android-permissions
           cordova plugin add cordova-plugin-statusbar
-          cordova plugin add cordova-plugin-splashscreen
           cordova plugin add cordova-plugin-device
           cordova plugin add cordova-plugin-whitelist
 
@@ -51,5 +51,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: shouq-debug-apk
+          name: shouq-apk
           path: build/platforms/android/app/build/outputs/apk/debug/app-debug.apk
