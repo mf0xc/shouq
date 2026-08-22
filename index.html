@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://nviviicpompmdokkritx.supabase.co https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://nviviicpompmdokkritx.supabase.co;">
+    <title>شوق</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background Stars Canvas -->
+    <canvas id="stars-canvas"></canvas>
+
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="screen active">
+        <div class="splash-content">
+            <div class="moon-icon">🌙</div>
+            <h1 class="app-title">شوق</h1>
+            <p class="app-subtitle">لحظات من الحنين</p>
+            <div class="divider"></div>
+
+            <div class="login-form">
+                <label for="name-input">من أنت؟</label>
+                <input type="text" id="name-input" placeholder="اكتب اسمك هنا..." autocomplete="off" autocorrect="off" autocapitalize="off">
+                <button id="enter-btn" class="enter-btn">
+                    <span>دخول</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+
+            <p id="error-msg" class="error-message"></p>
+        </div>
+    </div>
+
+    <!-- Main Screen -->
+    <div id="main-screen" class="screen">
+        <div class="main-content">
+            <div class="header">
+                <div class="user-badge">
+                    <span class="user-icon">✨</span>
+                    <span id="user-name" class="user-name"></span>
+                </div>
+                <button id="logout-btn" class="logout-btn" title="خروج">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="heart-section">
+                <div class="glow-ring"></div>
+                <button id="miss-btn" class="miss-btn">
+                    <span class="btn-text">أشتاق لك</span>
+                    <span class="btn-emoji">🤍</span>
+                </button>
+                <div class="ripple-container"></div>
+            </div>
+
+            <div class="counter-section">
+                <div class="counter-card">
+                    <div class="counter-label">مرات الاشتياق</div>
+                    <div id="counter" class="counter-value">0</div>
+                    <div class="counter-sub">منذ أول لقاء</div>
+                </div>
+            </div>
+
+            <div class="footer-text">
+                <p>كل ضغطة هي نبضة قلب 💫</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span class="toast-icon">✨</span>
+        <span class="toast-text"></span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
