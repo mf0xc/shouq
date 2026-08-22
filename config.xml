@@ -12,6 +12,7 @@
 
     <content src="index.html" />
 
+    <!-- Preferences -->
     <preference name="Orientation" value="portrait" />
     <preference name="Fullscreen" value="false" />
     <preference name="DisallowOverscroll" value="true" />
@@ -20,21 +21,21 @@
     <preference name="StatusBarStyle" value="lightcontent" />
     <preference name="KeepRunning" value="true" />
     <preference name="android-minSdkVersion" value="24" />
-    <preference name="android-targetSdkVersion" value="36" />
+    <preference name="android-targetSdkVersion" value="33" />
     <preference name="AndroidPersistentFileLocation" value="Compatibility" />
     <preference name="AndroidInsecureFileModeEnabled" value="true" />
     <preference name="EnableViewportScale" value="true" />
 
+    <!-- Security -->
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
 
+    <!-- Platform: Android -->
     <platform name="android">
         <icon src="icon.png" />
-        <preference name="AndroidWindowSplashScreenAnimatedIcon" value="icon.png" />
-        <preference name="AndroidWindowSplashScreenIconBackgroundColor" value="#050505" />
-        <preference name="AndroidWindowSplashScreenBackground" value="#050505" />
 
+        <!-- Permissions -->
         <config-file parent="/*" target="AndroidManifest.xml">
             <uses-permission android:name="android.permission.INTERNET" />
             <uses-permission android:name="android.permission.VIBRATE" />
@@ -49,13 +50,14 @@
         </edit-config>
     </platform>
 
+    <!-- Platform: iOS -->
     <platform name="ios">
         <icon src="icon.png" />
         <preference name="deployment-target" value="13.0" />
     </platform>
 
+    <!-- Plugins -->
     <plugin name="cordova-plugin-vibration" spec="^3.1.1" />
-    <plugin name="cordova-plugin-local-notification" spec="^0.9.0-beta.3" />
     <plugin name="cordova-plugin-android-permissions" spec="^1.1.5" />
     <plugin name="cordova-plugin-statusbar" spec="^4.0.0" />
     <plugin name="cordova-plugin-device" spec="^2.1.0" />

@@ -1,9 +1,6 @@
 /**
  * شوق - تطبيق الاشتياق
  * Cordova Hybrid App with Supabase Integration
- * 
- * Logic: When you press "I miss you", it saves YOUR click.
- * The counter shows how many times the OTHER person missed you.
  */
 
 // ===== Configuration =====
@@ -137,18 +134,12 @@ function initStars() {
 
 // ===== Event Binding =====
 function bindEvents() {
-    // Name selector
     elements.nameOptions.forEach(option => {
         option.addEventListener('click', () => selectName(option));
     });
 
-    // Enter button
     elements.enterBtn.addEventListener('click', handleLogin);
-
-    // Miss button
     elements.missBtn.addEventListener('click', handleMissClick);
-
-    // Logout
     elements.logoutBtn.addEventListener('click', handleLogout);
 }
 
@@ -168,7 +159,6 @@ function handleLogin() {
     }
 
     state.userName = state.selectedName;
-    // The OTHER person is the one NOT selected
     state.otherName = CONFIG.VALID_NAMES.find(n => n !== state.selectedName);
 
     localStorage.setItem('shouq_user', state.userName);
@@ -231,20 +221,13 @@ function handleLogout() {
 
 // ===== Miss Button Logic =====
 async function handleMissClick() {
-    // 1. Vibrate
     triggerVibration();
-
-    // 2. Show notification
     showLocalNotification();
-
-    // 3. Visual effects
     createRipple();
     animateCounter();
 
-    // 4. Save to Supabase (save YOUR click)
     await saveToSupabase();
 
-    // 5. Button animation
     elements.missBtn.style.transform = 'scale(0.93)';
     setTimeout(() => {
         elements.missBtn.style.transform = '';
@@ -266,24 +249,9 @@ function triggerVibration() {
 }
 
 function showLocalNotification() {
-    try {
-        if (typeof cordova !== 'undefined' && cordova.plugins && cordova.plugins.notification && cordova.plugins.notification.local) {
-            cordova.plugins.notification.local.schedule({
-                id: Date.now(),
-                title: CONFIG.NOTIFICATION_TITLE,
-                text: CONFIG.NOTIFICATION_TEXT,
-                foreground: true,
-                vibrate: false,
-                sound: false,
-                smallIcon: 'res://icon',
-                icon: 'res://icon'
-            });
-        } else {
-            showToast(CONFIG.NOTIFICATION_TEXT);
-        }
-    } catch (e) {
-        showToast(CONFIG.NOTIFICATION_TEXT);
-    }
+    // Using simple in-app toast instead of local-notification plugin
+    // (cordova-plugin-local-notification is incompatible with Gradle 8+)
+    showToast(CONFIG.NOTIFICATION_TEXT);
 }
 
 function createRipple() {
@@ -299,7 +267,6 @@ function animateCounter() {
 }
 
 // ===== Supabase Operations =====
-// Save YOUR click to Supabase
 async function saveToSupabase() {
     if (!state.supabase || !state.userName) return;
 
@@ -333,7 +300,6 @@ async function loadOtherCount() {
 
         if (error) {
             console.error('Supabase count error:', error);
-            // Fallback: localStorage
             state.otherCount = parseInt(localStorage.getItem(`shouq_count_${state.otherName}`)) || 0;
         } else {
             state.otherCount = count || 0;
@@ -349,8 +315,7 @@ async function loadOtherCount() {
     }
 }
 
-// ===== Real-time Updates =====
-// Poll for updates every 10 seconds to show live count
+// Real-time updates every 10 seconds
 setInterval(() => {
     if (state.userName && state.otherName) {
         loadOtherCount();
@@ -387,7 +352,6 @@ function requestStoragePermission() {
         if (typeof cordova !== 'undefined' && cordova.plugins && cordova.plugins.permissions) {
             const permissions = cordova.plugins.permissions;
 
-            // Request READ_EXTERNAL_STORAGE
             permissions.checkPermission(permissions.READ_EXTERNAL_STORAGE, (status) => {
                 if (!status.hasPermission) {
                     permissions.requestPermission(permissions.READ_EXTERNAL_STORAGE, (status) => {
@@ -398,7 +362,6 @@ function requestStoragePermission() {
                 }
             });
 
-            // Request WRITE_EXTERNAL_STORAGE
             permissions.checkPermission(permissions.WRITE_EXTERNAL_STORAGE, (status) => {
                 if (!status.hasPermission) {
                     permissions.requestPermission(permissions.WRITE_EXTERNAL_STORAGE, (status) => {
