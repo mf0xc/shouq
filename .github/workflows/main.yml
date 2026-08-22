@@ -6,6 +6,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      CORDOVA_ANDROID_GRADLE_DISTRIBUTION_URL: https://services.gradle.org/distributions/gradle-8.5-bin.zip
     steps:
       - uses: actions/checkout@v4
 
@@ -39,16 +41,6 @@ jobs:
         run: |
           cd build
           cordova platform add android@12.0.1
-
-      - name: Fix Gradle version
-        run: |
-          mkdir -p build/platforms/android/gradle/wrapper
-          echo "distributionBase=GRADLE_USER_HOME" > build/platforms/android/gradle/wrapper/gradle-wrapper.properties
-          echo "distributionPath=wrapper/dists" >> build/platforms/android/gradle/wrapper/gradle-wrapper.properties
-          echo "distributionUrl=https://services.gradle.org/distributions/gradle-8.5-bin.zip" >> build/platforms/android/gradle/wrapper/gradle-wrapper.properties
-          echo "networkTimeout=10000" >> build/platforms/android/gradle/wrapper/gradle-wrapper.properties
-          echo "zipStoreBase=GRADLE_USER_HOME" >> build/platforms/android/gradle/wrapper/gradle-wrapper.properties
-          echo "zipStorePath=wrapper/dists" >> build/platforms/android/gradle/wrapper/gradle-wrapper.properties
 
       - name: Add plugins
         run: |
