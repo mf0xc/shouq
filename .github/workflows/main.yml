@@ -26,9 +26,9 @@ jobs:
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Create project & copy files
+      - name: Create project and copy files
         run: |
-          cordova create build com.shouq.app "شوق"
+          cordova create build com.shouq.app "shouq"
           cp index.html build/www/
           cp style.css build/www/
           cp script.js build/www/
@@ -42,38 +42,13 @@ jobs:
 
       - name: Fix Gradle version
         run: |
-          ls -la build/platforms/android/
-          ls -la build/platforms/android/gradle/ || echo "no gradle dir"
-          find build/platforms/android -name "gradle-wrapper.properties" -type f
-          WRAPPER=$(find build/platforms/android -name "gradle-wrapper.properties" -type f | head -1)
-          if [ -n "$WRAPPER" ]; then
-            DIR=$(dirname "$WRAPPER")
-            echo "Found wrapper at: $WRAPPER"
-            echo "Directory: $DIR"
-            cat "$WRAPPER"
-            rm -f "$WRAPPER"
-            cat > "$WRAPPER" << 'EOF'
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https://services.gradle.org/distributions/gradle-8.5-bin.zip
-networkTimeout=10000
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists
-EOF
-            echo "Updated wrapper:"
-            cat "$WRAPPER"
-          else
-            echo "No gradle-wrapper.properties found, creating..."
-            mkdir -p build/platforms/android/gradle/wrapper
-            cat > build/platforms/android/gradle/wrapper/gradle-wrapper.properties << 'EOF'
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https://services.gradle.org/distributions/gradle-8.5-bin.zip
-networkTimeout=10000
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists
-EOF
-          fi
+          mkdir -p build/platforms/android/gradle/wrapper
+          echo "distributionBase=GRADLE_USER_HOME" > build/platforms/android/gradle/wrapper/gradle-wrapper.properties
+          echo "distributionPath=wrapper/dists" >> build/platforms/android/gradle/wrapper/gradle-wrapper.properties
+          echo "distributionUrl=https://services.gradle.org/distributions/gradle-8.5-bin.zip" >> build/platforms/android/gradle/wrapper/gradle-wrapper.properties
+          echo "networkTimeout=10000" >> build/platforms/android/gradle/wrapper/gradle-wrapper.properties
+          echo "zipStoreBase=GRADLE_USER_HOME" >> build/platforms/android/gradle/wrapper/gradle-wrapper.properties
+          echo "zipStorePath=wrapper/dists" >> build/platforms/android/gradle/wrapper/gradle-wrapper.properties
 
       - name: Add plugins
         run: |
