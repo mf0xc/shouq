@@ -1,6 +1,9 @@
 /**
  * شوق - تطبيق الاشتياق
  * Cordova Hybrid App with Supabase Integration
+ * 
+ * Logic: When you press "I miss you", it saves YOUR click.
+ * The counter shows how many times the OTHER person missed you.
  */
 
 // ===== Configuration =====
@@ -9,16 +12,18 @@ const CONFIG = {
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52aXZpaWNwb21wbWRva2tyaXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMTc3NzQsImV4cCI6MjEwMjc5Mzc3NH0.hqqp-bqejHF7AlGhlfLcoyZ1MEhGGsqkfilZy1gaG6E',
     VALID_NAMES: ['فرات', 'فاطمة'],
     NOTIFICATION_TITLE: 'شوق',
-    NOTIFICATION_TEXT: 'أنا مشتاق لك 🤍',
+    NOTIFICATION_TEXT: 'أنا مشتاق لك',
     VIBRATE_DURATION: 300
 };
 
 // ===== State =====
 let state = {
     userName: null,
-    pressCount: 0,
+    otherName: null,
+    otherCount: 0,
     supabase: null,
-    isReady: false
+    isReady: false,
+    selectedName: null
 };
 
 // ===== DOM Elements =====
@@ -31,6 +36,7 @@ document.addEventListener('deviceready', () => {
     console.log('Cordova device ready');
     state.isReady = true;
     requestNotificationPermission();
+    requestStoragePermission();
 }, false);
 
 // Fallback for browser testing
@@ -47,7 +53,7 @@ function init() {
 function cacheElements() {
     elements.splashScreen = document.getElementById('splash-screen');
     elements.mainScreen = document.getElementById('main-screen');
-    elements.nameInput = document.getElementById('name-input');
+    elements.nameOptions = document.querySelectorAll('.name-option');
     elements.enterBtn = document.getElementById('enter-btn');
     elements.errorMsg = document.getElementById('error-msg');
     elements.userName = document.getElementById('user-name');
@@ -64,9 +70,8 @@ function initSupabase() {
     try {
         if (typeof supabase !== 'undefined' && supabase.createClient) {
             state.supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-            console.log('Supabase initialized successfully');
+            console.log('Supabase initialized');
         } else {
-            console.warn('Supabase SDK not loaded yet, will retry...');
             setTimeout(initSupabase, 1000);
         }
     } catch (e) {
@@ -89,14 +94,14 @@ function initStars() {
 
     function createStars() {
         stars = [];
-        const count = Math.floor((canvas.width * canvas.height) / 4000);
+        const count = Math.floor((canvas.width * canvas.height) / 5000);
         for (let i = 0; i < count; i++) {
             stars.push({
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
-                size: Math.random() * 1.5 + 0.5,
+                size: Math.random() * 1.2 + 0.3,
                 opacity: Math.random(),
-                speed: Math.random() * 0.02 + 0.005,
+                speed: Math.random() * 0.015 + 0.003,
                 twinkle: Math.random() * Math.PI * 2
             });
         }
@@ -107,18 +112,17 @@ function initStars() {
 
         stars.forEach(star => {
             star.twinkle += star.speed;
-            const alpha = 0.3 + Math.abs(Math.sin(star.twinkle)) * 0.7;
+            const alpha = 0.2 + Math.abs(Math.sin(star.twinkle)) * 0.5;
 
             ctx.beginPath();
             ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(232, 213, 163, ${alpha * star.opacity})`;
+            ctx.fillStyle = `rgba(200, 200, 200, ${alpha * star.opacity})`;
             ctx.fill();
 
-            // Glow for larger stars
-            if (star.size > 1.2) {
+            if (star.size > 0.9) {
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, star.size * 3, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(201, 168, 76, ${alpha * 0.1})`;
+                ctx.fillStyle = `rgba(200, 200, 200, ${alpha * 0.05})`;
                 ctx.fill();
             }
         });
@@ -133,58 +137,51 @@ function initStars() {
 
 // ===== Event Binding =====
 function bindEvents() {
+    // Name selector
+    elements.nameOptions.forEach(option => {
+        option.addEventListener('click', () => selectName(option));
+    });
+
     // Enter button
     elements.enterBtn.addEventListener('click', handleLogin);
-    elements.nameInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleLogin();
-    });
 
     // Miss button
     elements.missBtn.addEventListener('click', handleMissClick);
 
     // Logout
     elements.logoutBtn.addEventListener('click', handleLogout);
+}
 
-    // Input focus effects
-    elements.nameInput.addEventListener('focus', () => {
-        hideError();
-    });
+function selectName(option) {
+    elements.nameOptions.forEach(opt => opt.classList.remove('selected'));
+    option.classList.add('selected');
+    state.selectedName = option.dataset.name;
+    elements.enterBtn.disabled = false;
+    hideError();
 }
 
 // ===== Login Logic =====
 function handleLogin() {
-    const name = elements.nameInput.value.trim();
-
-    if (!name) {
-        showError('الرجاء إدخال اسمك');
+    if (!state.selectedName) {
+        showError('الرجاء اختيار اسمك');
         return;
     }
 
-    if (!CONFIG.VALID_NAMES.includes(name)) {
-        showError('هذا الاسم ليس لي، أنا أنتظر فقط فرات أو فاطمة');
-        elements.nameInput.value = '';
-        elements.nameInput.focus();
-        return;
-    }
+    state.userName = state.selectedName;
+    // The OTHER person is the one NOT selected
+    state.otherName = CONFIG.VALID_NAMES.find(n => n !== state.selectedName);
 
-    // Valid name - proceed
-    state.userName = name;
-    localStorage.setItem('shouq_user', name);
+    localStorage.setItem('shouq_user', state.userName);
 
     hideError();
     showScreen('main');
-    loadUserData();
-    showToast(`مرحباً ${name} 💫`);
+    loadOtherCount();
+    showToast('مرحباً ' + state.userName);
 }
 
 function showError(msg) {
     elements.errorMsg.textContent = msg;
     elements.errorMsg.classList.add('show');
-
-    // Shake animation on input
-    elements.nameInput.style.animation = 'none';
-    elements.nameInput.offsetHeight; // trigger reflow
-    elements.nameInput.style.animation = 'shake 0.5s ease';
 }
 
 function hideError() {
@@ -203,8 +200,9 @@ function showScreen(screen) {
         elements.mainScreen.classList.remove('active');
         setTimeout(() => {
             elements.splashScreen.classList.add('active');
-            elements.nameInput.value = '';
-            elements.nameInput.focus();
+            elements.nameOptions.forEach(opt => opt.classList.remove('selected'));
+            state.selectedName = null;
+            elements.enterBtn.disabled = true;
         }, 300);
     }
 }
@@ -214,15 +212,19 @@ function checkSession() {
     const savedName = localStorage.getItem('shouq_user');
     if (savedName && CONFIG.VALID_NAMES.includes(savedName)) {
         state.userName = savedName;
+        state.otherName = CONFIG.VALID_NAMES.find(n => n !== savedName);
         showScreen('main');
-        loadUserData();
+        loadOtherCount();
+    } else {
+        elements.enterBtn.disabled = true;
     }
 }
 
 function handleLogout() {
     localStorage.removeItem('shouq_user');
     state.userName = null;
-    state.pressCount = 0;
+    state.otherName = null;
+    state.otherCount = 0;
     elements.counter.textContent = '0';
     showScreen('splash');
 }
@@ -239,18 +241,16 @@ async function handleMissClick() {
     createRipple();
     animateCounter();
 
-    // 4. Update counter
-    state.pressCount++;
-    elements.counter.textContent = state.pressCount;
-
-    // 5. Save to Supabase
+    // 4. Save to Supabase (save YOUR click)
     await saveToSupabase();
 
-    // 6. Button animation
-    elements.missBtn.style.transform = 'scale(0.92)';
+    // 5. Button animation
+    elements.missBtn.style.transform = 'scale(0.93)';
     setTimeout(() => {
         elements.missBtn.style.transform = '';
     }, 150);
+
+    showToast('تم إرسال اشتياقك');
 }
 
 function triggerVibration() {
@@ -267,7 +267,6 @@ function triggerVibration() {
 
 function showLocalNotification() {
     try {
-        // Try Cordova local notification
         if (typeof cordova !== 'undefined' && cordova.plugins && cordova.plugins.notification && cordova.plugins.notification.local) {
             cordova.plugins.notification.local.schedule({
                 id: Date.now(),
@@ -280,11 +279,9 @@ function showLocalNotification() {
                 icon: 'res://icon'
             });
         } else {
-            // Fallback: show in-app toast
             showToast(CONFIG.NOTIFICATION_TEXT);
         }
     } catch (e) {
-        console.log('Notification error:', e);
         showToast(CONFIG.NOTIFICATION_TEXT);
     }
 }
@@ -293,20 +290,16 @@ function createRipple() {
     const ripple = document.createElement('div');
     ripple.className = 'ripple';
     elements.rippleContainer.appendChild(ripple);
-
-    setTimeout(() => {
-        ripple.remove();
-    }, 1000);
+    setTimeout(() => ripple.remove(), 1000);
 }
 
 function animateCounter() {
     elements.counter.classList.add('pop');
-    setTimeout(() => {
-        elements.counter.classList.remove('pop');
-    }, 400);
+    setTimeout(() => elements.counter.classList.remove('pop'), 400);
 }
 
 // ===== Supabase Operations =====
+// Save YOUR click to Supabase
 async function saveToSupabase() {
     if (!state.supabase || !state.userName) return;
 
@@ -321,38 +314,48 @@ async function saveToSupabase() {
         if (error) {
             console.error('Supabase insert error:', error);
         } else {
-            console.log('Click saved to Supabase');
+            console.log('Click saved for:', state.userName);
         }
     } catch (e) {
         console.error('Supabase save error:', e);
     }
 }
 
-async function loadUserData() {
-    if (!state.supabase || !state.userName) return;
+// Load how many times the OTHER person missed YOU
+async function loadOtherCount() {
+    if (!state.supabase || !state.otherName) return;
 
     try {
         const { count, error } = await state.supabase
             .from('miss_clicks')
             .select('*', { count: 'exact', head: true })
-            .eq('user_name', state.userName);
+            .eq('user_name', state.otherName);
 
         if (error) {
             console.error('Supabase count error:', error);
-            // Fallback: count from local
-            state.pressCount = parseInt(localStorage.getItem(`shouq_count_${state.userName}`)) || 0;
+            // Fallback: localStorage
+            state.otherCount = parseInt(localStorage.getItem(`shouq_count_${state.otherName}`)) || 0;
         } else {
-            state.pressCount = count || 0;
-            localStorage.setItem(`shouq_count_${state.userName}`, state.pressCount);
+            state.otherCount = count || 0;
+            localStorage.setItem(`shouq_count_${state.otherName}`, state.otherCount);
         }
 
-        elements.counter.textContent = state.pressCount;
+        elements.counter.textContent = state.otherCount;
+        console.log(state.otherName, 'missed you', state.otherCount, 'times');
     } catch (e) {
         console.error('Load data error:', e);
-        state.pressCount = parseInt(localStorage.getItem(`shouq_count_${state.userName}`)) || 0;
-        elements.counter.textContent = state.pressCount;
+        state.otherCount = parseInt(localStorage.getItem(`shouq_count_${state.otherName}`)) || 0;
+        elements.counter.textContent = state.otherCount;
     }
 }
+
+// ===== Real-time Updates =====
+// Poll for updates every 10 seconds to show live count
+setInterval(() => {
+    if (state.userName && state.otherName) {
+        loadOtherCount();
+    }
+}, 10000);
 
 // ===== Notification Permission (Android 13+) =====
 function requestNotificationPermission() {
@@ -378,6 +381,39 @@ function requestNotificationPermission() {
     }
 }
 
+// ===== Storage Permission =====
+function requestStoragePermission() {
+    try {
+        if (typeof cordova !== 'undefined' && cordova.plugins && cordova.plugins.permissions) {
+            const permissions = cordova.plugins.permissions;
+
+            // Request READ_EXTERNAL_STORAGE
+            permissions.checkPermission(permissions.READ_EXTERNAL_STORAGE, (status) => {
+                if (!status.hasPermission) {
+                    permissions.requestPermission(permissions.READ_EXTERNAL_STORAGE, (status) => {
+                        console.log('Read storage permission:', status.hasPermission ? 'granted' : 'denied');
+                    }, (error) => {
+                        console.error('Read storage error:', error);
+                    });
+                }
+            });
+
+            // Request WRITE_EXTERNAL_STORAGE
+            permissions.checkPermission(permissions.WRITE_EXTERNAL_STORAGE, (status) => {
+                if (!status.hasPermission) {
+                    permissions.requestPermission(permissions.WRITE_EXTERNAL_STORAGE, (status) => {
+                        console.log('Write storage permission:', status.hasPermission ? 'granted' : 'denied');
+                    }, (error) => {
+                        console.error('Write storage error:', error);
+                    });
+                }
+            });
+        }
+    } catch (e) {
+        console.log('Storage permission plugin not available');
+    }
+}
+
 // ===== Toast =====
 let toastTimeout;
 function showToast(message) {
@@ -387,21 +423,8 @@ function showToast(message) {
     clearTimeout(toastTimeout);
     toastTimeout = setTimeout(() => {
         elements.toast.classList.remove('show');
-    }, 3000);
+    }, 2500);
 }
-
-// ===== Shake Animation (CSS injection) =====
-const shakeStyle = document.createElement('style');
-shakeStyle.textContent = `
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        20% { transform: translateX(-8px); }
-        40% { transform: translateX(8px); }
-        60% { transform: translateX(-4px); }
-        80% { transform: translateX(4px); }
-    }
-`;
-document.head.appendChild(shakeStyle);
 
 // ===== Prevent double-tap zoom =====
 let lastTouchEnd = 0;
@@ -414,4 +437,4 @@ document.addEventListener('touchend', (e) => {
 }, false);
 
 // ===== Console log =====
-console.log('🌙 شوق - loaded and ready');
+console.log('شوق - loaded and ready');

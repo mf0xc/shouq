@@ -7,36 +7,39 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://nviviicpompmdokkritx.supabase.co https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://nviviicpompmdokkritx.supabase.co;">
     <title>شوق</title>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
-    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Background Stars Canvas -->
     <canvas id="stars-canvas"></canvas>
 
     <!-- Splash Screen -->
     <div id="splash-screen" class="screen active">
         <div class="splash-content">
-            <div class="moon-icon">🌙</div>
+            <div class="moon-icon"></div>
             <h1 class="app-title">شوق</h1>
             <p class="app-subtitle">لحظات من الحنين</p>
             <div class="divider"></div>
 
             <div class="login-form">
-                <label for="name-input">من أنت؟</label>
-                <input type="text" id="name-input" placeholder="اكتب اسمك هنا..." autocomplete="off" autocorrect="off" autocapitalize="off">
+                <label>من أنت؟</label>
+                <div class="name-selector">
+                    <button class="name-option" data-name="فرات">
+                        <span class="name-text">فرات</span>
+                        <span class="name-indicator"></span>
+                    </button>
+                    <button class="name-option" data-name="فاطمة">
+                        <span class="name-text">فاطمة</span>
+                        <span class="name-indicator"></span>
+                    </button>
+                </div>
                 <button id="enter-btn" class="enter-btn">
                     <span>دخول</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </svg>
                 </button>
             </div>
 
@@ -49,7 +52,6 @@
         <div class="main-content">
             <div class="header">
                 <div class="user-badge">
-                    <span class="user-icon">✨</span>
                     <span id="user-name" class="user-name"></span>
                 </div>
                 <button id="logout-btn" class="logout-btn" title="خروج">
@@ -65,28 +67,25 @@
                 <div class="glow-ring"></div>
                 <button id="miss-btn" class="miss-btn">
                     <span class="btn-text">أشتاق لك</span>
-                    <span class="btn-emoji">🤍</span>
                 </button>
                 <div class="ripple-container"></div>
             </div>
 
             <div class="counter-section">
                 <div class="counter-card">
-                    <div class="counter-label">مرات الاشتياق</div>
+                    <div class="counter-label">استاق لك</div>
                     <div id="counter" class="counter-value">0</div>
-                    <div class="counter-sub">منذ أول لقاء</div>
+                    <div class="counter-sub">مرة</div>
                 </div>
             </div>
 
             <div class="footer-text">
-                <p>كل ضغطة هي نبضة قلب 💫</p>
+                <p>كل نبضة قلب هي شهادة حب</p>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
     <div id="toast" class="toast">
-        <span class="toast-icon">✨</span>
         <span class="toast-text"></span>
     </div>
 

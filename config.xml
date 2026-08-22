@@ -3,22 +3,21 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:cdv="http://cordova.apache.org/ns/1.0"
         id="com.shouq.app"
-        version="1.0.0"
-        versionCode="100">
+        version="1.1.0"
+        versionCode="110">
 
     <name>شوق</name>
     <description>تطبيق هدية عاطفية - لحظات من الحنين</description>
     <author email="shouq@app.com" href="https://shouq.app">شوق</author>
 
-    <!-- Content -->
     <content src="index.html" />
 
     <!-- Preferences -->
     <preference name="Orientation" value="portrait" />
     <preference name="Fullscreen" value="false" />
     <preference name="DisallowOverscroll" value="true" />
-    <preference name="BackgroundColor" value="0xFF0a0a0f" />
-    <preference name="StatusBarBackgroundColor" value="#0a0a0f" />
+    <preference name="BackgroundColor" value="0xFF050505" />
+    <preference name="StatusBarBackgroundColor" value="#050505" />
     <preference name="StatusBarStyle" value="lightcontent" />
     <preference name="KeepRunning" value="true" />
     <preference name="SplashScreenDelay" value="2000" />
@@ -33,7 +32,6 @@
     <preference name="MediaPlaybackRequiresUserAction" value="false" />
     <preference name="AllowInlineMediaPlayback" value="true" />
 
-    <!-- WebView Settings -->
     <preference name="WKWebViewOnly" value="true" />
     <preference name="CordovaWebViewEngine" value="CDVWKWebViewEngine" />
 
@@ -48,14 +46,12 @@
 
     <!-- Platform: Android -->
     <platform name="android">
-        <!-- App Icon -->
         <icon src="res/icon/android/mipmap-xxxhdpi/ic_launcher.png" density="xxxhdpi" />
         <icon src="res/icon/android/mipmap-xxhdpi/ic_launcher.png" density="xxhdpi" />
         <icon src="res/icon/android/mipmap-xhdpi/ic_launcher.png" density="xhdpi" />
         <icon src="res/icon/android/mipmap-hdpi/ic_launcher.png" density="hdpi" />
         <icon src="res/icon/android/mipmap-mdpi/ic_launcher.png" density="mdpi" />
 
-        <!-- Splash Screen -->
         <splash src="res/screen/android/splash-port-xxxhdpi.png" density="port-xxxhdpi" />
         <splash src="res/screen/android/splash-port-xxhdpi.png" density="port-xxhdpi" />
         <splash src="res/screen/android/splash-port-xhdpi.png" density="port-xhdpi" />
@@ -69,17 +65,18 @@
             <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
             <uses-permission android:name="android.permission.WAKE_LOCK" />
             <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
         </config-file>
 
-        <!-- Application Config -->
         <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
-            <application android:usesCleartextTraffic="false" />
+            <application android:usesCleartextTraffic="false" android:requestLegacyExternalStorage="true" />
         </edit-config>
 
-        <!-- Theme -->
         <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/screen/android/splash-icon.png" />
-        <preference name="AndroidWindowSplashScreenIconBackgroundColor" value="#0a0a0f" />
-        <preference name="AndroidWindowSplashScreenBackground" value="#0a0a0f" />
+        <preference name="AndroidWindowSplashScreenIconBackgroundColor" value="#050505" />
+        <preference name="AndroidWindowSplashScreenBackground" value="#050505" />
     </platform>
 
     <!-- Platform: iOS -->
@@ -115,11 +112,8 @@
     <plugin name="cordova-plugin-statusbar" spec="^4.0.0" />
     <plugin name="cordova-plugin-splashscreen" spec="^6.0.2" />
     <plugin name="cordova-plugin-device" spec="^2.1.0" />
-
-    <!-- Whitelist Plugin (for older Cordova versions) -->
     <plugin name="cordova-plugin-whitelist" spec="^1.3.5" />
 
-    <!-- Hooks -->
     <hook type="after_prepare" src="scripts/after_prepare.js" />
 
 </widget>
