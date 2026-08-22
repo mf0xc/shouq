@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Install Android SDK
         uses: android-actions/setup-android@v3
@@ -33,7 +33,7 @@ jobs:
           cp style.css build/www/
           cp script.js build/www/
           cp config.xml build/
-          cp icon.png build/www/
+          cp icon.png build/
           cd build
           cordova platform add android@latest
           cordova plugin add cordova-plugin-vibration
