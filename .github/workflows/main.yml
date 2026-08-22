@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '11'
 
       - name: Install Android SDK
         uses: android-actions/setup-android@v3
@@ -36,10 +36,10 @@ jobs:
           cp icon.png build/
           cd build
 
-      - name: Add Android platform (compatible version)
+      - name: Add Android platform (v11 - compatible)
         run: |
           cd build
-          cordova platform add android@12.0.1
+          cordova platform add android@11.0.0
 
       - name: Add plugins
         run: |
@@ -48,7 +48,6 @@ jobs:
           cordova plugin add cordova-plugin-android-permissions
           cordova plugin add cordova-plugin-statusbar
           cordova plugin add cordova-plugin-device
-          cordova plugin add cordova-plugin-whitelist
 
       - name: Build APK
         run: |
