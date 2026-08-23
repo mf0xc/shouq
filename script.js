@@ -29,11 +29,6 @@ const elements = {};
 // ===== Initialization =====
 document.addEventListener('DOMContentLoaded', init);
 
-// Capacitor init - no deviceready needed!
-if (typeof Capacitor !== 'undefined') {
-    console.log('Capacitor detected');
-}
-
 function init() {
     cacheElements();
     initStars();
@@ -106,12 +101,12 @@ function initStars() {
             const alpha = 0.2 + Math.abs(Math.sin(star.twinkle)) * 0.5;
             ctx.beginPath();
             ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(200, 200, 200, ${alpha * star.opacity})`;
+            ctx.fillStyle = `rgba(255, 220, 230, ${alpha * star.opacity})`;
             ctx.fill();
             if (star.size > 0.9) {
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, star.size * 3, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(200, 200, 200, ${alpha * 0.05})`;
+                ctx.fillStyle = `rgba(255, 220, 230, ${alpha * 0.05})`;
                 ctx.fill();
             }
         });
@@ -206,7 +201,7 @@ function handleLogout() {
 
 // ===== Miss Button Logic =====
 async function handleMissClick() {
-    triggerVibration();
+    await triggerVibration();
     showNotification();
     createRipple();
     animateCounter();
@@ -216,39 +211,46 @@ async function handleMissClick() {
     showToast('تم إرسال اشتياقك');
 }
 
-// ===== Capacitor Vibration =====
+// ===== Vibration - Capacitor Haptics (FIXED) =====
 async function triggerVibration() {
     try {
-        if (typeof Capacitor !== 'undefined') {
-            const { Haptics } = await import('@capacitor/haptics');
-            await Haptics.vibrate({ duration: CONFIG.VIBRATE_DURATION });
-        } else if (navigator.vibrate) {
+        // Try Capacitor Haptics first
+        const { Haptics } = await import('@capacitor/haptics');
+        await Haptics.vibrate({ duration: CONFIG.VIBRATE_DURATION });
+        console.log('Haptics vibrated');
+        return;
+    } catch (e) {
+        console.log('Capacitor Haptics failed:', e.message);
+    }
+
+    // Fallback: navigator.vibrate
+    try {
+        if (navigator.vibrate) {
             navigator.vibrate(CONFIG.VIBRATE_DURATION);
+            console.log('navigator.vibrate used');
+            return;
         }
     } catch (e) {
-        console.log('Vibration error:', e);
-        if (navigator.vibrate) navigator.vibrate(CONFIG.VIBRATE_DURATION);
+        console.log('navigator.vibrate failed:', e.message);
     }
+
+    console.log('No vibration available');
 }
 
-// ===== Capacitor Local Notification =====
+// ===== Notification =====
 async function showNotification() {
     try {
-        if (typeof Capacitor !== 'undefined') {
-            const { LocalNotifications } = await import('@capacitor/local-notifications');
-            await LocalNotifications.schedule({
-                notifications: [{
-                    id: Date.now(),
-                    title: CONFIG.NOTIFICATION_TITLE,
-                    body: CONFIG.NOTIFICATION_TEXT,
-                    schedule: { at: new Date(Date.now() + 100) }
-                }]
-            });
-        } else {
-            showToast(CONFIG.NOTIFICATION_TEXT);
-        }
+        const { LocalNotifications } = await import('@capacitor/local-notifications');
+        await LocalNotifications.schedule({
+            notifications: [{
+                id: Date.now(),
+                title: CONFIG.NOTIFICATION_TITLE,
+                body: CONFIG.NOTIFICATION_TEXT,
+                schedule: { at: new Date(Date.now() + 100) }
+            }]
+        });
     } catch (e) {
-        console.log('Notification error:', e);
+        console.log('Notification error:', e.message);
         showToast(CONFIG.NOTIFICATION_TEXT);
     }
 }
@@ -256,12 +258,10 @@ async function showNotification() {
 // ===== Request Permissions =====
 async function requestPermissions() {
     try {
-        if (typeof Capacitor !== 'undefined') {
-            const { LocalNotifications } = await import('@capacitor/local-notifications');
-            await LocalNotifications.requestPermissions();
-        }
+        const { LocalNotifications } = await import('@capacitor/local-notifications');
+        await LocalNotifications.requestPermissions();
     } catch (e) {
-        console.log('Permission request error:', e);
+        console.log('Permission request error:', e.message);
     }
 }
 
