@@ -66,14 +66,10 @@ jobs:
           cp icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png
           cp icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
 
-      - name: Setup splash screen icon
+      - name: Remove broken anydpi-v26 folder
         run: |
-          # For Android 12+ splash screen (windowSplashScreenAnimatedIcon)
-          mkdir -p android/app/src/main/res/drawable
-          cp icon.png android/app/src/main/res/drawable/ic_launcher_foreground.png
-          # Also copy to mipmap-anydpi-v26 if exists
-          mkdir -p android/app/src/main/res/mipmap-anydpi-v26
-          cp icon.png android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml || true
+          # Remove the anydpi-v26 folder that causes XML parse error
+          rm -rf android/app/src/main/res/mipmap-anydpi-v26
 
       - name: Build APK with Gradle
         run: |
