@@ -1,0 +1,15 @@
+{
+  "appId": "com.shouq.app",
+  "appName": "شوق",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon_config_sample",
+      "iconColor": "#1a3a2a"
+    }
+  }
+}

@@ -1,6 +1,6 @@
 /**
  * شوق - تطبيق الاشتياق
- * Cordova Hybrid App with Supabase Integration
+ * Capacitor Hybrid App with Supabase Integration
  */
 
 // ===== Configuration =====
@@ -29,15 +29,10 @@ const elements = {};
 // ===== Initialization =====
 document.addEventListener('DOMContentLoaded', init);
 
-document.addEventListener('deviceready', () => {
-    console.log('Cordova device ready');
-    state.isReady = true;
-    requestNotificationPermission();
-    requestStoragePermission();
-}, false);
-
-// Fallback for browser testing
-document.addEventListener('deviceready', () => {}, false);
+// Capacitor init - no deviceready needed!
+if (typeof Capacitor !== 'undefined') {
+    console.log('Capacitor detected');
+}
 
 function init() {
     cacheElements();
@@ -45,6 +40,7 @@ function init() {
     initSupabase();
     bindEvents();
     checkSession();
+    requestPermissions();
 }
 
 function cacheElements() {
@@ -81,7 +77,6 @@ function initStars() {
     const canvas = document.getElementById('stars-canvas');
     const ctx = canvas.getContext('2d');
     let stars = [];
-    let animationId;
 
     function resize() {
         canvas.width = window.innerWidth;
@@ -106,16 +101,13 @@ function initStars() {
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
         stars.forEach(star => {
             star.twinkle += star.speed;
             const alpha = 0.2 + Math.abs(Math.sin(star.twinkle)) * 0.5;
-
             ctx.beginPath();
             ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(200, 200, 200, ${alpha * star.opacity})`;
             ctx.fill();
-
             if (star.size > 0.9) {
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, star.size * 3, 0, Math.PI * 2);
@@ -123,8 +115,7 @@ function initStars() {
                 ctx.fill();
             }
         });
-
-        animationId = requestAnimationFrame(draw);
+        requestAnimationFrame(draw);
     }
 
     window.addEventListener('resize', resize);
@@ -137,7 +128,6 @@ function bindEvents() {
     elements.nameOptions.forEach(option => {
         option.addEventListener('click', () => selectName(option));
     });
-
     elements.enterBtn.addEventListener('click', handleLogin);
     elements.missBtn.addEventListener('click', handleMissClick);
     elements.logoutBtn.addEventListener('click', handleLogout);
@@ -157,12 +147,9 @@ function handleLogin() {
         showError('الرجاء اختيار اسمك');
         return;
     }
-
     state.userName = state.selectedName;
     state.otherName = CONFIG.VALID_NAMES.find(n => n !== state.selectedName);
-
     localStorage.setItem('shouq_user', state.userName);
-
     hideError();
     showScreen('main');
     loadOtherCount();
@@ -178,7 +165,6 @@ function hideError() {
     elements.errorMsg.classList.remove('show');
 }
 
-// ===== Screen Management =====
 function showScreen(screen) {
     if (screen === 'main') {
         elements.splashScreen.classList.remove('active');
@@ -197,7 +183,6 @@ function showScreen(screen) {
     }
 }
 
-// ===== Session Check =====
 function checkSession() {
     const savedName = localStorage.getItem('shouq_user');
     if (savedName && CONFIG.VALID_NAMES.includes(savedName)) {
@@ -222,36 +207,62 @@ function handleLogout() {
 // ===== Miss Button Logic =====
 async function handleMissClick() {
     triggerVibration();
-    showLocalNotification();
+    showNotification();
     createRipple();
     animateCounter();
-
     await saveToSupabase();
-
     elements.missBtn.style.transform = 'scale(0.93)';
-    setTimeout(() => {
-        elements.missBtn.style.transform = '';
-    }, 150);
-
+    setTimeout(() => { elements.missBtn.style.transform = ''; }, 150);
     showToast('تم إرسال اشتياقك');
 }
 
-function triggerVibration() {
+// ===== Capacitor Vibration =====
+async function triggerVibration() {
     try {
-        if (navigator.vibrate) {
+        if (typeof Capacitor !== 'undefined') {
+            const { Haptics } = await import('@capacitor/haptics');
+            await Haptics.vibrate({ duration: CONFIG.VIBRATE_DURATION });
+        } else if (navigator.vibrate) {
             navigator.vibrate(CONFIG.VIBRATE_DURATION);
-        } else if (typeof cordova !== 'undefined' && cordova.plugins && cordova.plugins.vibration) {
-            cordova.plugins.vibration.vibrate(CONFIG.VIBRATE_DURATION);
         }
     } catch (e) {
-        console.log('Vibration not available');
+        console.log('Vibration error:', e);
+        if (navigator.vibrate) navigator.vibrate(CONFIG.VIBRATE_DURATION);
     }
 }
 
-function showLocalNotification() {
-    // Using simple in-app toast instead of local-notification plugin
-    // (cordova-plugin-local-notification is incompatible with Gradle 8+)
-    showToast(CONFIG.NOTIFICATION_TEXT);
+// ===== Capacitor Local Notification =====
+async function showNotification() {
+    try {
+        if (typeof Capacitor !== 'undefined') {
+            const { LocalNotifications } = await import('@capacitor/local-notifications');
+            await LocalNotifications.schedule({
+                notifications: [{
+                    id: Date.now(),
+                    title: CONFIG.NOTIFICATION_TITLE,
+                    body: CONFIG.NOTIFICATION_TEXT,
+                    schedule: { at: new Date(Date.now() + 100) }
+                }]
+            });
+        } else {
+            showToast(CONFIG.NOTIFICATION_TEXT);
+        }
+    } catch (e) {
+        console.log('Notification error:', e);
+        showToast(CONFIG.NOTIFICATION_TEXT);
+    }
+}
+
+// ===== Request Permissions =====
+async function requestPermissions() {
+    try {
+        if (typeof Capacitor !== 'undefined') {
+            const { LocalNotifications } = await import('@capacitor/local-notifications');
+            await LocalNotifications.requestPermissions();
+        }
+    } catch (e) {
+        console.log('Permission request error:', e);
+    }
 }
 
 function createRipple() {
@@ -269,35 +280,24 @@ function animateCounter() {
 // ===== Supabase Operations =====
 async function saveToSupabase() {
     if (!state.supabase || !state.userName) return;
-
     try {
         const { error } = await state.supabase
             .from('miss_clicks')
-            .insert([{
-                user_name: state.userName,
-                timestamp: new Date().toISOString()
-            }]);
-
-        if (error) {
-            console.error('Supabase insert error:', error);
-        } else {
-            console.log('Click saved for:', state.userName);
-        }
+            .insert([{ user_name: state.userName, timestamp: new Date().toISOString() }]);
+        if (error) console.error('Supabase insert error:', error);
+        else console.log('Click saved for:', state.userName);
     } catch (e) {
         console.error('Supabase save error:', e);
     }
 }
 
-// Load how many times the OTHER person missed YOU
 async function loadOtherCount() {
     if (!state.supabase || !state.otherName) return;
-
     try {
         const { count, error } = await state.supabase
             .from('miss_clicks')
             .select('*', { count: 'exact', head: true })
             .eq('user_name', state.otherName);
-
         if (error) {
             console.error('Supabase count error:', error);
             state.otherCount = parseInt(localStorage.getItem(`shouq_count_${state.otherName}`)) || 0;
@@ -305,11 +305,8 @@ async function loadOtherCount() {
             state.otherCount = count || 0;
             localStorage.setItem(`shouq_count_${state.otherName}`, state.otherCount);
         }
-
         elements.counter.textContent = state.otherCount;
-        console.log(state.otherName, 'missed you', state.otherCount, 'times');
     } catch (e) {
-        console.error('Load data error:', e);
         state.otherCount = parseInt(localStorage.getItem(`shouq_count_${state.otherName}`)) || 0;
         elements.counter.textContent = state.otherCount;
     }
@@ -317,87 +314,24 @@ async function loadOtherCount() {
 
 // Real-time updates every 10 seconds
 setInterval(() => {
-    if (state.userName && state.otherName) {
-        loadOtherCount();
-    }
+    if (state.userName && state.otherName) loadOtherCount();
 }, 10000);
-
-// ===== Notification Permission (Android 13+) =====
-function requestNotificationPermission() {
-    try {
-        if (typeof cordova !== 'undefined' && cordova.plugins && cordova.plugins.permissions) {
-            const permissions = cordova.plugins.permissions;
-            const notificationPermission = permissions.POST_NOTIFICATIONS;
-
-            permissions.checkPermission(notificationPermission, (status) => {
-                if (!status.hasPermission) {
-                    permissions.requestPermission(notificationPermission, (status) => {
-                        console.log('Notification permission:', status.hasPermission ? 'granted' : 'denied');
-                    }, (error) => {
-                        console.error('Permission request error:', error);
-                    });
-                }
-            }, (error) => {
-                console.error('Permission check error:', error);
-            });
-        }
-    } catch (e) {
-        console.log('Permission plugin not available');
-    }
-}
-
-// ===== Storage Permission =====
-function requestStoragePermission() {
-    try {
-        if (typeof cordova !== 'undefined' && cordova.plugins && cordova.plugins.permissions) {
-            const permissions = cordova.plugins.permissions;
-
-            permissions.checkPermission(permissions.READ_EXTERNAL_STORAGE, (status) => {
-                if (!status.hasPermission) {
-                    permissions.requestPermission(permissions.READ_EXTERNAL_STORAGE, (status) => {
-                        console.log('Read storage permission:', status.hasPermission ? 'granted' : 'denied');
-                    }, (error) => {
-                        console.error('Read storage error:', error);
-                    });
-                }
-            });
-
-            permissions.checkPermission(permissions.WRITE_EXTERNAL_STORAGE, (status) => {
-                if (!status.hasPermission) {
-                    permissions.requestPermission(permissions.WRITE_EXTERNAL_STORAGE, (status) => {
-                        console.log('Write storage permission:', status.hasPermission ? 'granted' : 'denied');
-                    }, (error) => {
-                        console.error('Write storage error:', error);
-                    });
-                }
-            });
-        }
-    } catch (e) {
-        console.log('Storage permission plugin not available');
-    }
-}
 
 // ===== Toast =====
 let toastTimeout;
 function showToast(message) {
     elements.toastText.textContent = message;
     elements.toast.classList.add('show');
-
     clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => {
-        elements.toast.classList.remove('show');
-    }, 2500);
+    toastTimeout = setTimeout(() => elements.toast.classList.remove('show'), 2500);
 }
 
 // ===== Prevent double-tap zoom =====
 let lastTouchEnd = 0;
 document.addEventListener('touchend', (e) => {
     const now = Date.now();
-    if (now - lastTouchEnd <= 300) {
-        e.preventDefault();
-    }
+    if (now - lastTouchEnd <= 300) e.preventDefault();
     lastTouchEnd = now;
 }, false);
 
-// ===== Console log =====
 console.log('شوق - loaded and ready');
