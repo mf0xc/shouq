@@ -42,12 +42,38 @@ jobs:
         run: |
           npx cap sync android
 
-      - name: Copy icon to Android resources
+      - name: Setup app icon for launcher
         run: |
+          # Copy icon to all mipmap densities for launcher icon
+          mkdir -p android/app/src/main/res/mipmap-mdpi
+          mkdir -p android/app/src/main/res/mipmap-hdpi
+          mkdir -p android/app/src/main/res/mipmap-xhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxhdpi
           mkdir -p android/app/src/main/res/mipmap-xxxhdpi
+          cp icon.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          cp icon.png android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png
+          cp icon.png android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
+          cp icon.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp icon.png android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png
+          cp icon.png android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
+          cp icon.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          cp icon.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png
+          cp icon.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
+          cp icon.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp icon.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png
+          cp icon.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
           cp icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
           cp icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png
           cp icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+
+      - name: Setup splash screen icon
+        run: |
+          # For Android 12+ splash screen (windowSplashScreenAnimatedIcon)
+          mkdir -p android/app/src/main/res/drawable
+          cp icon.png android/app/src/main/res/drawable/ic_launcher_foreground.png
+          # Also copy to mipmap-anydpi-v26 if exists
+          mkdir -p android/app/src/main/res/mipmap-anydpi-v26
+          cp icon.png android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml || true
 
       - name: Build APK with Gradle
         run: |
